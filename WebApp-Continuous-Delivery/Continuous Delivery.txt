@@ -1,0 +1,82 @@
+
+
+Module 2:
+
+CD workflow:
+
+1.Test
+	Unit and Integration testing
+		Source Code
+		Test Suite
+		Docker wrap Test Runner:
+			java 	-	maven,gradle
+			python	-	manage.py
+		
+
+2.Build
+	Build application artifact
+		-	python  wheels
+		-	java JAR files
+
+	Create deployable artifact
+
+3.Release
+	Create deployable release artifact in the form of Docker release image
+		-	runtime environment
+		-	install application artifact
+	Create release environment using docker compose
+		-	run acceptance testing 
+	Tag and publish the Docker image
+		-	only the acceptance is pass
+		-	push to Docker Hub
+
+4.Deploy
+	Deploy the docker image in atlease one environment
+		-	dev, QA or staging envieonment
+		-	Ansible used to deplot the AWS
+		-	AWS EC2 container mange rolling deployment of docker image
+
+
+
+Installation Process:
+
+	-	Install VMWare Fusion
+	-	Install brew package manager
+		-	installation commend get from brew home page
+		-	check brew update command- brew update
+	-	Install Docker
+		-	brew install docker-compose
+		-	brew install docker
+		-	brew install docker-machine
+	- 	Install Python
+		-	brew install python
+		-	pip install pip --upgrade
+	-	Install ansible
+		-	pip install ansible --upgrade 
+		-	pip install boto boto3
+		-	pip install awscli
+	-	Install git
+		- 	brew install git
+		-	Install sublime text
+	-	Create docker virtual machine
+		-	docker-machine create --driver virtualbox modifyvm--cpus 4 --memory 			20000 --vram 8000 --name dockervm01
+		-	docker-machine env dockervm01
+		-	eval "$(docker-machine env dockervm01)"
+		-	docker pull ubundu
+		-	docker images
+		-	docker-machine ip dockervm01
+		-	docker-machine ssh dockervm01
+		-	docker-machine restart dockervm01
+		-	docker-machine ls
+
+
+Module 3:
+
+	-	create simple django application
+		-	pip install django==version
+		-	django-admin startproject TodoApp
+		-	create src folder in TodoApp. then , move manage.py file to src folder. 
+
+
+
+
