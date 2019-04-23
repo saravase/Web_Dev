@@ -73,10 +73,16 @@ Installation Process:
 Module 3:
 
 	-	create simple django application
+		-	pip install virtualenv
+		-	virtualenv envname
+		-	env\scripts\activate
+		-	pip install pip --upgrade
 		-	pip install django==version
+		-	pip install djangorestframework
+		-	pip install 
 		-	django-admin startproject TodoApp
 		-	create src folder in TodoApp. then , move manage.py file to src folder. 
-
+		-	
 
 
 
