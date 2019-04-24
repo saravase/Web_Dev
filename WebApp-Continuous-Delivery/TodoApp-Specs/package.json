@@ -1,0 +1,24 @@
+{
+  "name": "todoapp-specs",
+  "version": "1.0.0",
+  "description": "TodoApp Acceptance Test",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "Web_Dev"
+  },
+  "author": "Saravanakumar Selvam",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.5.4",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "mocha": "^6.1.4",
+    "mocha-jenkins-reporter": "^0.4.1",
+    "superagent": "^5.0.2",
+    "superagent-promise": "^1.1.0"
+  }
+}

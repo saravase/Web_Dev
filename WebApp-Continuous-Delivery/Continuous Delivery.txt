@@ -79,10 +79,33 @@ Module 3:
 		-	pip install pip --upgrade
 		-	pip install django==version
 		-	pip install djangorestframework
-		-	pip install 
+		-	pip install django-cors-headers
 		-	django-admin startproject TodoApp
 		-	create src folder in TodoApp. then , move manage.py file to src folder. 
-		-	
+	-	Unit and Integration Testing
+		-	create tests file todo app and write testcases
+		-	run command : python manage.py test
+		-	create settings folder and create base,test file with in the folder
+		-	run command : python manage.py test --settings=TodoApp.settings.test
+		-	Improving test output 
+		- 	install command : pip install django-nose
+		-	pip install pinocchio
+		-	pip install coverage
+		-	run command : python manage.py test --settings=TodoApp.settings.test
+	-	Acceptance Test
+		-	create TodoApp-Spec folder
+		-	install node.js
+		-	commnad : npm init
+		-	command : npm install bluebird chai chai-as-promised mocha superagent superagent-promise mocha-jenkins-reporter --save
+			- save flag add packages with dependencies
+			- mocha and chai used create and run the test  
+			- superagent used to communicate with HTTP client
+			- bluebrid support promises used to control asy process
+			- jenkins-reporter provide junit.xml report
+			
+
+
+
 
 
 
