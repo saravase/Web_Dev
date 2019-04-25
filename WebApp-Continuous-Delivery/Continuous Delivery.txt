@@ -96,16 +96,39 @@ Module 3:
 		-	create TodoApp-Spec folder
 		-	install node.js
 		-	commnad : npm init
-		-	command : npm install bluebird chai chai-as-promised mocha superagent superagent-promise mocha-jenkins-reporter --save
-			- save flag add packages with dependencies
-			- mocha and chai used create and run the test  
-			- superagent used to communicate with HTTP client
-			- bluebrid support promises used to control asy process
-			- jenkins-reporter provide junit.xml report
+		-	command : npm install bluebird chai chai-as-promised mocha superagent 					superagent-promise mocha-jenkins-reporter --save
+		- 	save flag add packages with dependencies
+		- 	mocha and chai used create and run the test  
+		- 	superagent used to communicate with HTTP client
+		- 	bluebrid support promises used to control asy process
+		- 	jenkins-reporter provide junit.xml report
+	- 	Crate TodoCleient
+		-	clone TodoClient
+		-	run commnad : npm install
+		-	run commnad : npm install -g grunt-cli
+		- 	run commnad : node app.js
+
+MODULE 4:
+	-  	Continuous Delivery Workflow
+		-	Test
+			-	Create Test Environement
+				-	Base Image
+				-	Development Image
+				-	Docker Compose
+			-	Run unit Test
+				-	Single Container
+			-	Run Itegration Test
+				-	Single/ Multi container Complex workflow
+		-	Basic of Base Image
+			-	minimum runtime environment
+			-	application defendencies
+			-	system configuration
+			-	default setting
+		-	Basic of Release Image
+			-	install application
+			-	application configuration
+			-	application entrypoint
+		-	Basic of development Image
+			-	install Dev defendencies
+			-	install buid / test tool
 			
-
-
-
-
-
-
