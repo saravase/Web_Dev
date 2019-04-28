@@ -131,4 +131,186 @@ MODULE 4:
 		-	Basic of development Image
 			-	install Dev defendencies
 			-	install buid / test tool
+	-Create base image
+		-	folder structure - TodoApp-Base
+
+		-	Docker Operation ------- Base docker image ----- Docker Repository
+		                      commit                    push           
+            																    = CI + CD
+		-	Developer  --------  sourcecode -------    git repository  
+		                commit               push                     
+
+		-   create folder TodoApp-Base. 
+		-	create Docker file using command - touch Dockerfile 
+		-	create entrypoint
+
+		Base Image:
+
 			
+			# parent image ubundu,release code name trusty 
+			FROM ubundu:trusty
+			MAINTAINER Saravanakumar Selvam  <saravanakumar323py@gmail.com>
+
+			# prevent package error
+			ENV TERM=xterm-256color
+			
+			# Set mirrors to NZ
+			# sed is a editor, s/Regexp/Replacement store location
+			RUN sed -i "s/http:\/\/archive./http:\/\/nz.archive./g" /etc/apt/sources.list
+
+			# Install python runtime
+			# Update the linux package database
+			RUN apt-get update &&\
+				apt-get install -y\
+				-o APT::Install-Recommend=false -o APT::Install-Suggests=false \
+				pyhon python-virtualenv
+
+			# Create virtual environment
+			# Upgrade PIP in virtual environment to latest version
+			RUN virtualenv /appenv && \
+				./appenv/bin/activate && \
+				pip install pip --upgrade
+
+		- Create entrypoint.sh
+			# activate the virtual environment
+			. /appenv/bin/activate
+			exec $@
+		- Run build command - docker build -t saravase/TodoApp-Base .
+		- Display list of images - docker images
+		- Run entrypoint - docker run -rm saravase/TodoApp ps
+			# -rm - cleanup container
+			# ps show current container
+
+	- 	Create development image
+		-	Folder structure
+			TodoApp - docker - dev - create Docker file
+		-	Development Image
+			FROM saravase/TodoApp-Base:latest
+			MAINTAINER Saravanakumar Selvam <saravanakumar323py@gmail.com>
+
+			# Install dev/build dependancies
+			RUN apt-get update && \
+				apt-get install -qy python-dev
+
+			#Activate VE and install wheel
+			RUN ./appenv/bin/activate && \
+				pip install wheel --upgrade
+
+			# PIP environment variavbles
+			ENV WHEELHOUSE=/wheelhouse PIP_WHEEL_DIR=/wheelhouse PIP_FIND_LINKS=/wheelhouse XDG_CACHE_HOME=/cache
+
+			# OUTPUT: Build artifacts(wheel) are output here
+			VOLUME /wheelhouse
+
+			# OUTPUT: Test reports
+			VOLUME /reports
+
+			#Add test entrypoint script
+			COPY scripts/test.sh /usr/local/bin/test.sh
+			RUN chmod +x /usr/local/bin/test.sh
+
+			# Set defaults for entrypoint and command string
+			ENTRYPOINT ["test.sh"]
+			CMD ["python", "manage.py", "tst", "--noinput"]
+
+			# Add applicaton source
+			COPY src / application
+			WORKDIR /application
+
+		- 	Create folder TodoApp - scripts - test.sh
+		-	test.sh
+			# Activate VE
+			. /appenv/bin/activate
+
+			# Install application test requirements
+			pip install -r requirements_test.txt
+
+			# Run test.sh arguements
+			exec $@
+	- 	Create application requirements
+		-	Create folder structure - TodoApp - src - requirements.txt
+		-	requirements.txt
+			Django==2.2
+			django-cors-headers==2.5.2
+			djnagorestframework==3.9.2
+			mysqlclient==1.4.2.post1
+
+		-	requirements_test.txt
+			-r requirements.txt
+			colorama==0.4.1
+			coverage==4.5.3
+			django-nose==1.4.6
+			nose==1.3.7
+			pinocchio==0.4.2
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
