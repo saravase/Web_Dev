@@ -732,9 +732,84 @@ MODULE:6
         	-	run command: docker-compose run --rm app manage.py migrate --noinput
         	-	run command: docker-compose up test
         	-	run commnad: docker tag release_app saravase/TodoApp:0.01
-        -	CD workflow
+MODULE : 7
+    -	CD workflow
+    	-	GNU Make
+    		-	three reason
+    			-	make designed for the shell
+    			-	syntex is simple and more powerful
+    			-	maitainability and usability (popular)
+    	-	Creating make file
+    		-	folder sructure TodoApp/Makefile
+    		-	Makefile
+    			# Project variables
+    			PROJECT_NAME ?= TodoApp
+    			ORG_NAME ?= saravase
+    			REPO_NAME ?= TodoApp
 
+    			#Filename
+    			DEV_COMPOSE_FILE := docker/dev/docker-compose.yml
+    			REL_COMPOSE_FILE := docker/release/docker-compose.yml
 
+    			#Docker compose project name
+    			REL_PROJECT := $(PROJECT_NAME)$(BUILD_ID)
+    			DEV_PROJECT := $(REL_PROJECT)dev
+
+    			.PHONY : test build release clean
+
+    			test:
+    				docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) build
+    				docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) up agent
+    				docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) up test
+
+    			build:
+    				docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) up builder
+
+    			release:
+    				docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) build
+    				docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) up agent
+    				docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) run --rm app manage.py collectstatic --noinput
+    				docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) run --rm app manage.py migrate --noinput
+    				docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) up test
+
+    			clean:
+    				docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) kill
+    				docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) rm -f
+    				docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) kill
+    				docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) rm -f
+    		-	run command : make test	
+    		-	run command : make build
+    		-	run command : make release
+    		-	run command : make clean
+    	-	Creating GitHub repositories
+    		-	create repository TodoApp
+    			-	run command: git status
+    			-	run command: git log
+    			-	run command: git remote add origin url:saravase/TodoApp.git
+    			-	run command: git push -u origin master
+    	-	Creating DockerHub repositories
+    		-	login docker hub
+    		-	click create
+    		-	create repository
+    		-	enter repository name, short description, full description, visibility
+    		-	click create
+    		-	move to TodoApp-Client path
+    		-	run command: docker build -t saravase/TodoApp-Client.
+    		-	run command: docker push saravase/TodoApp-Client
+    		-	run command: docker login
+    			-	Enter Username
+    			-	Enter Password
+    			-	Enter Email
+    		-	run command: docker push saravase/TodoApp-Client
+    	- Create automated build repositories
+    		-	normal repositories
+    			-	TodoApp-Client
+    			-	TodoApp
+    		-	automated build repositories
+    			-	TodoApp-Base
+    			-	TodoApp-Specs
+    			-	TodoApp-Ansible
+    			
 
 
 
