@@ -809,7 +809,115 @@ MODULE : 7
     			-	TodoApp-Base
     			-	TodoApp-Specs
     			-	TodoApp-Ansible
-    			
+MODULE : 8
+	-	Enhance CD Workflow
+		-	Dangling images and volumes
+			-	 dangling images
+				-	if you chnage the   source and build it. Each time new images was created . The previous image tag was setted as None.
+			- 	run command: image remove - docker rmi imageId
+			-	run command: get dangling images - docker images -f dangling=true
+			-	edit makeFile
+				-	clean
+					...
+					docker images -q -f dangling=true -f label=application=$(REPO_NAME) | xargs -I ARGS docker rmi -f ARGS
+			-	edit TodoApp-Base/DcokerFile
+				-	...
+					LABEL application=todobackend
+			-	move TodoApp-Base
+				-	run command: docker build -t saravase/TodoApp-Base.
+			-	push to git origin/master.
+			-	move TodoApp
+				-	run command: make test
+				-	run command: make clean
+				-	after clean some dangling images are avilable.
+				-	run command: docker rmi $(docker images -f dangling=true -q)
+				-	run command: docker images -f dangling=true
+				-	run command: make clean
+			-	remove dangling volumes
+				-	run command: docker volume ls
+				-	run command: docker volume ls -f dangling=true
+				-	run command: docker volumes remove command - docker volume rm $(docker volume ls -f dangling=true -q)
+			-	edit makeFile
+				clean:
+				docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) rm -f -v
+				docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) rm -f -v
+		-	Improving user Feedback
+			-	print some messages with some colors. This is used to user easly identify everything.
+			-	edit makeFile
+				...
+				
+				clean:
+				$(INFO) "Destroying development environment"
+				$(INFO) "Clean completed"
+
+				# Cosmatics
+				YELLOW := "\e[1;33m"
+				NC := "\e[0m"
+
+				#Shell functions
+				INFO := @base -c '\
+					printf $(YELLOW)
+					echo "=> $$1"; \
+					printf $(NC)' SOME_VALUE
+			-	run command: make test
+		-	Self Containment
+			-	move docker/ansible folder from TodoApp to TodoApp-Ansible
+			-	edit TodoAppAnsile/DockerFile
+				-	...
+				# copy backed in playbook
+				COPY ansible /ansible
+			-	run command: docker build -t saravase/TodoApp-Ansible.
+			-	push changes to git
+			-	edit TodoApp/docker-compose.yml
+				-	agent:
+					remove volumes
+					add command:
+					command: ['probe.yml']
+					builder:
+					remove volumes
+			-	edit makeFile
+				build:
+				@ docker cp $$(docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) ps -q builder):/wheelhouse/. target
+                # $$(docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) ps -q builder) this command return current builder service container id
+            - 	edit TodoApp/docker/release/dockercompose.yml
+            	agent:
+            	..
+            	remove volumes
+            	add command:
+            	command ['probe.yml']
+            -	add structure TodoApp/docker/release/Dockerfile.ngnix
+            	FROM ngnix
+            	MAINTAINER Saravanakumar Selvam <saravanakumr323py@gmail.com>
+
+            	# Copy configuation file
+            	COPY TodoApp.conf /etc/ngnix/conf.d/TodoApp.conf
+            -	edit TodoApp/docker/release/docker-compose.yml
+            	ngnix:
+            	add..
+            	build:.
+            	dockerfile: Dockerfile.ngnix
+            	remove volumes
+        -	Producing test reports
+            	test:
+            	@ docker cp $$(docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) ps -q test):/reports/. reports
+				release:                
+            	@ docker cp $$(docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) ps -q release):/reports/. reports
+            - 	run command: make test
+            - 	run command: make release
+            -	edit dockerignore file
+            	add 
+            	reports
+        -	Handling Failures and errors
+        	-	
+
+
+
+
+
+
+
+
+
 
 
 
