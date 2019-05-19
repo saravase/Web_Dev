@@ -908,7 +908,152 @@ MODULE : 8
             	add 
             	reports
         -	Handling Failures and errors
-        	-	
+        	-	edit  the test in makeFile
+        		@ docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) run --rm test
+        			-	it is produce some reports generation issue
+        		@ docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) up test
+        	-	modify initial variable assignment
+        		variable assignment:
+        		INSPECT := $$(docker-compose -p $$1 -f $$2 ps -q $$3 | xargs -I ARGS docker inspect -f "{{ .State.ExitCode}}" ARGS)
+
+        		CHECK := @base -c '\
+        			if [[ $(INSPECT) -ne 0]];\
+        			then exit $(INSPECT); fi' VALUE
+        		test:
+        		after up test
+        		$(CHECK) $(DEVPROJECT) $(DEV_COMPOSE_FILE) test
+
+        		builder:
+        		$(CHECK) $(DEV_PROJECT) $(DEV_COMPOSE_FILE) builder
+
+        		release:
+        		after up test
+        		$(CHECK) $(REL_PROJECT) $(REL_COMPOSE_FILE) test
+        -   Ensuring Consistency
+        		test:
+        		@ docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) pull
+        		@ docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) build --pull test
+        		@ docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) build cache
+
+        		release:
+        		@ docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) build app
+        		@ docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) build webroot
+        		@ docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) build -pull ngnix
+        - 	Tagging the Release Image
+        		Ex:
+        		  docker tag<image id><registry>/<org>/todobackend:0.1;
+        		tag:
+        		@ $(foreach tag, $(TAG_ARGS), docker tag $(IMAGE_ID) $(DOCKER_REGISTRY)/$(ORG_NAME)/$(REPO_NAME): $(tag);)
+
+        		Initialize docker hub registry
+        		DOCKER_REGISTRY ?= docker.io
+
+        		atlast in make file
+
+        		# Get container id of application service container
+        		APP_CONTAINER_ID := $$(docker-compose -p $(RELPROJECT) -f $(REL_COMPOSE_FILE) ps -q $(APP_SERVICE_NAME)) 
+
+        		# Get image id of application service
+        		IMAGE_ID := $$(docker inspect -f '{{ .Image }}' $(APP_CONTAINER_ID))
+
+        		# Extract tag argument
+        		ifeq( tag, $(firstword $(MAKECMDGOALS)))
+        			TAG_ARGS := $(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))
+        			ifeq ($(TAG_ARGS),)
+        				$(error you must s pecify the tag)
+        			endif
+        			$(eval $(TAG_ARGS):;@:)
+        		endif
+
+        		# Variable assignment
+        		APP_SERVICE_NAME :=  app
+        	-	make buildtag
+        		buildtag:
+					@ $(foreach tag, $(BUILD_TAG_ARGS), docker tag $(IMAGE_ID) $(DOCKER_REGISTRY)/$(ORG_NAME)/$(REPO_NAME): $(tag).$(BUILD_TAG);)
+				# Extract tag argument
+        		ifeq( buildtag, $(firstword $(MAKECMDGOALS)))
+        			BUILD_TAG_ARGS := $(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))
+        			ifeq ($(BUILD_TAG_ARGS),)
+        				$(error you must s pecify the tag)
+        			endif
+        			$(eval $(BUILD_TAG_ARGS):;@:)
+        		endif
+
+        		# Iniitialize assignment
+        		BUILD_TAG_EXPRESSION ?= date -u +%Y%m%d%H%M%%S
+        		BUILD_EXPRESSION := $(shell $(BUILD_TAG_EXPRESSION))
+        		BUILD_TAG ?= $(BUILD_EXPRESSION)
+
+        - 	Publising the release image
+        		create phony login logout publish
+        		Initialize variable
+        		DOCKER_REGISTRY_AUTH ?=
+
+        		login:
+        		@ docker login -u $$DOCKER_USER -p $$DOCKER_PASSWORD -e $$DOCKER_EMAIL $(DOCKER_REGISTRY_AUTH)
+
+        		logout:
+        		@ docker logout
+
+        		publish:
+        		@ $(foreach tag,$(shell echo $(REPO_EXPR)), docker push $(tag);)
+
+        		REPO_EXPR := $$(docker inspect -f '{{range .RepoTags}}{{.}}{{end}}' $(IMAGE_ID) | grep -oh "$(REPO_FILTER)" | xargs)
+
+        		Assign repo filter
+        		ifeq ($(DOCKER_RESITRY), docker.io)
+        			REPO_FILTER := $(ORG_NAME)/$(REPO_NAME)[^[:space:]|\$$]*
+        		else
+        			REPO_FILTER := $(DOCKER_REGISTRY) / $(ORG_NAME)/$(REPO_NAME)[^[:space:] | \$$]*
+
+        	-	Export credentials using export command
+        - 	Docker Compose  version 2 specification
+        	-	version: '2'
+        		volumes:
+        			build:
+        				driver : local
+        			cache:
+        			    external : true
+
+        		services:
+        			test:
+        				build:
+        					context : ../../
+        					dockerfile: docker/dev/Dockerfile
+        				volumes:
+        					build :/build
+        					cache :/cache
+
+        			build:
+        				build:
+        					context : ../../
+        					dockerfile: docker/dev/Dockerfile
+        				volumes:
+        					build :/build
+        		remove  cache service
+        	- 	edit makeFile
+        		@ docker volume create --name cache
+        		remove build cache
+        	-	edit release  compose
+        		remove webroot service
+
+        		volumes:
+        			webroot:
+        			driver: local
+        		services:
+        			edit build
+        			ngnix:
+        				volumes:
+        					-webroot :/var/www/todobackend
+        	-	edit the makeFile
+        		release:
+        		-	remove build webroot
+        		clean:
+        		@ docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) down -v
+        		@ docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) down -v
+        		remove dev and release kill and volume remove command
+        		
+
 
 
 
